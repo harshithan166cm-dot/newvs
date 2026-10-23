@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibrant Colorful Calci</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #ff758c 0%, #ff7eb3 100%);
+            padding: 20px;
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 360px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 32px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .display {
+            width: 100%;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            font-size: 2.2rem;
+            color: #2d3748;
+            text-align: right;
+            outline: none;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        button {
+            padding: 20px;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Color Coding Themes */
+        .btn-number {
+            background-color: #ffecd2;
+            color: #fc6076;
+        }
+        .btn-number:hover {
+            background-color: #fcb69f;
+            color: #fff;
+        }
+
+        .btn-operator {
+            background-color: #d4fc79;
+            color: #434343;
+        }
+        .btn-operator:hover {
+            background-color: #96e6a1;
+            color: #fff;
+        }
+
+        .btn-clear {
+            background-color: #ff9a9e;
+            color: #fff;
+            border-radius: 24px;
+            aspect-ratio: auto;
+        }
+        .btn-clear:hover {
+            background-color: #fecfef;
+            color: #ff758c;
+        }
+
+        .btn-equal {
+            background-color: #84fab0;
+            color: #fff;
+            grid-column: span 2;
+            border-radius: 24px;
+            aspect-ratio: auto;
+        }
+        .btn-equal:hover {
+            background-color: #8fd3f4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <input type="text" class="display" id="display" readonly value="0">
+        <div class="buttons">
+            <button class="btn-clear" onclick="clearDisplay()" style="grid-column: span 2;">C</button>
+            <button class="btn-operator" onclick="appendOperator('/')">÷</button>
+            <button class="btn-operator" onclick="appendOperator('*')">×</button>
+
+            <button class="btn-number" onclick="appendNumber('7')">7</button>
+            <button class="btn-number" onclick="appendNumber('8')">8</button>
+            <button class="btn-number" onclick="appendNumber('9')">9</button>
+            <button class="btn-operator" onclick="appendOperator('-')">-</button>
+
+            <button class="btn-number" onclick="appendNumber('4')">4</button>
+            <button class="btn-number" onclick="appendNumber('5')">5</button>
+            <button class="btn-number" onclick="appendNumber('6')">6</button>
+            <button class="btn-operator" onclick="appendOperator('+')">+</button>
+
+            <button class="btn-number" onclick="appendNumber('1')">1</button>
+            <button class="btn-number" onclick="appendNumber('2')">2</button>
+            <button class="btn-number" onclick="appendNumber('3')">3</button>
+            <button class="btn-equal" onclick="calculate()">=</button>
+
+            <button class="btn-number" onclick="appendNumber('0')" style="grid-column: span 2; border-radius: 24px; aspect-ratio: auto;">0</button>
+            <button class="btn-number" onclick="appendNumber('.')">.</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        let currentInput = '';
+        let shouldResetDisplay = false;
+
+        function appendNumber(number) {
+            if (display.value === '0' || shouldResetDisplay) {
+                currentInput = number;
+                shouldResetDisplay = false;
+            } else {
+                if (number === '.' && currentInput.includes('.')) return;
+                currentInput += number;
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(operator) {
+            if (currentInput === '' && display.value !== '0') {
+                currentInput = display.value;
+            }
+            
+            const lastChar = currentInput.slice(-1);
+            if (['+', '-', '*', '/'].includes(lastChar)) {
+                currentInput = currentInput.slice(0, -1) + operator;
+            } else if (currentInput !== '') {
+                currentInput += operator;
+            }
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentInput = '';
+            display.value = '0';
+        }
+
+        function calculate() {
+            if (currentInput === '') return;
+            
+            try {
+                // Using Function instead of eval for safer evaluation
+                const result = new Function(`return ${currentInput}`)();
+                
+                if (result === Infinity || isNaN(result)) {
+                    display.value = 'Error';
+                } else {
+                    // Round to maximum 8 decimal places to avoid floating point issues
+                    display.value = Number(Math.round(result + 'e8') + 'e-8');
+                }
+            } catch (error) {
+                display.value = 'Error';
+            }
+            currentInput = display.value;
+            shouldResetDisplay = true;
+        }
+
+        function updateDisplay() {
+            // Replace operators with pretty signs for visual readability
+            let formattedInput = currentInput
+                .replace(/\*/g, ' × ')
+                .replace(/\//g, ' ÷ ')
+                .replace(/\+/g, ' + ')
+                .replace(/-/g, ' - ');
+            
+            display.value = formattedInput || '0';
+        }
+    </script>
+</body>
+</html>
